@@ -13,7 +13,6 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {

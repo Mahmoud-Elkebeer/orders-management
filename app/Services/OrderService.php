@@ -60,6 +60,9 @@ class OrderService
         if ($order->payments()->exists()) {
             throw new DeleteOrderException("Cannot delete an order with associated payments.");
         }
+        if (Auth::id() !== $order->user_id) {
+            throw new UpdateOrderException('You are not authorized to delete this order.');
+        }
 
         $this->orderRepository->deleteOrder($order);
     }

@@ -38,15 +38,16 @@ class OrderRepository
     public function updateOrder(Order $order, array $data): Order
     {
         return DB::transaction(function () use ($order, $data) {
-            $amount = collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']);
+            if (isset($data['items'])) {
+                $amount = collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']);
+                $order->items()->delete();
+                $order->items()->createMany($data['items']);
+            }
 
             $order->update([
-                'amount' => $amount,
+                'amount' => $amount ?? $order->amount,
                 'status' => $data['status'] ?? OrderStatus::PENDING,
             ]);
-
-            $order->items()->delete();
-            $order->items()->createMany($data['items']);
 
             return $order->load('items');
         });
