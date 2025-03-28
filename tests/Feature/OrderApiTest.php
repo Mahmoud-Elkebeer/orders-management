@@ -23,6 +23,19 @@ class OrderApiTest extends TestCase
     }
 
     /** @test */
+    public function test_can_list_orders()
+    {
+        Order::factory()->count(5)->create(['user_id' => $this->user['user']->id]);
+
+        $response = $this->withHeaders($this->user['headers'])->getJson('/api/orders');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message', 'data' => [['id', 'status', 'amount']]
+            ]);
+    }
+
+    /** @test */
     public function it_can_create_order()
     {
         $data['items'] = [
@@ -39,7 +52,7 @@ class OrderApiTest extends TestCase
     /** @test */
     public function it_can_show_order()
     {
-        $order = Order::factory()->create();
+        $order = Order::factory()->create(['user_id' => $this->user['user']->id]);
 
         $response = $this->withHeaders($this->user['headers'])->getJson("/api/orders/{$order->id}");
 

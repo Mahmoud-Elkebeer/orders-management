@@ -8,7 +8,7 @@ use App\Enums\OrderStatus;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\OrderRepository;
 use App\Exceptions\DeleteOrderException;
-use App\Exceptions\UpdateOrderException;
+use App\Exceptions\OrderException;
 
 class OrderService
 {
@@ -41,27 +41,27 @@ class OrderService
     {
         $order = $this->orderRepository->getOrderById($id);
         if ($order->status !== OrderStatus::PENDING) {
-            throw new UpdateOrderException('Only pending orders can be updated.');
+            throw new OrderException('Only pending orders can be updated.');
         }
         if (Auth::id() !== $order->user_id) {
-            throw new UpdateOrderException('You are not authorized to update this order.');
+            throw new OrderException('You are not authorized to update this order.');
         }
 
         return $this->orderRepository->updateOrder($order, $data);
     }
 
     /**
-     * @throws DeleteOrderException
+     * @throws OrderException
      */
     public function deleteOrder($id)
     {
         $order = $this->orderRepository->getOrderById($id);
 
         if ($order->payments()->exists()) {
-            throw new DeleteOrderException("Cannot delete an order with associated payments.");
+            throw new OrderException("Cannot delete an order with associated payments.");
         }
         if (Auth::id() !== $order->user_id) {
-            throw new UpdateOrderException('You are not authorized to delete this order.');
+            throw new OrderException('You are not authorized to delete this order.');
         }
 
         $this->orderRepository->deleteOrder($order);

@@ -11,7 +11,8 @@ class OrderRepository
     public function getAllOrders(array $filters)
     {
         return Order::with('items')
-            ->when(isset($filters['status']), fn($query) => $query->where('status', $filters['status']));
+            ->when(isset($filters['status']), fn($query) => $query->where('status', $filters['status']))
+            ->when(isset($filters['user_id']), fn($query) => $query->where('user_id', $filters['user_id']));
     }
 
 

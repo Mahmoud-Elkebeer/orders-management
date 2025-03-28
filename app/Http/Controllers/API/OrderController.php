@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\DeleteOrderException;
-use App\Exceptions\UpdateOrderException;
+use App\Exceptions\OrderException;
 use Exception;
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
@@ -13,6 +12,7 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -20,24 +20,48 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only('status');
+        try {
+            $filters = $request->only('status');
 
-        $orders = $this->orderService->getOrders($filters);
+            $filters['user_id'] = Auth::id();
 
-        return ApiResponse::success(OrderResource::collection($orders), 'Orders retrieved successfully');
+            $orders = $this->orderService->getOrders($filters);
+
+            return ApiResponse::success(OrderResource::collection($orders), 'Orders retrieved successfully');
+        } catch (Exception $exception) {
+            return ApiResponse::error('An unexpected error occurred. Please try again later.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function store(CreateOrderRequest $request)
     {
-        $order = $this->orderService->createOrder($request->Validated());
+        try {
+            $order = $this->orderService->createOrder($request->Validated());
 
-        return ApiResponse::success(new OrderResource($order), 'Order created successfully', Response::HTTP_CREATED);
+            return ApiResponse::success(new OrderResource($order), 'Order created successfully', Response::HTTP_CREATED);
+        } catch (Exception $exception) {
+            return ApiResponse::error('An unexpected error occurred. Please try again later.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
+    /**
+     * @throws OrderException
+     */
     public function show($id)
     {
-        $order = $this->orderService->getOrder($id);
-        return ApiResponse::success(new OrderResource($order), 'Order created successfully');
+        try {
+            $order = $this->orderService->getOrder($id);
+
+            if (Auth::id() !== $order->user_id) {
+                throw new OrderException('You are not authorized to access this order.');
+            }
+
+            return ApiResponse::success(new OrderResource($order), 'Order retrieved successfully');
+        } catch (OrderException $exception){
+            return ApiResponse::error($exception->getMessage());
+        } catch (Exception $exception) {
+            return ApiResponse::error('An unexpected error occurred. Please try again later.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function update(UpdateOrderRequest $request, $id)
@@ -46,7 +70,7 @@ class OrderController extends Controller
             $order = $this->orderService->updateOrder($id, $request->validated());
 
             return ApiResponse::success(new OrderResource($order), 'Order updated successfully');
-        } catch (UpdateOrderException $exception){
+        } catch (OrderException $exception){
             return ApiResponse::error($exception->getMessage());
         } catch (Exception $exception) {
             return ApiResponse::error('An unexpected error occurred. Please try again later.', Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -58,7 +82,7 @@ class OrderController extends Controller
         try {
             $this->orderService->deleteOrder($id);
             return ApiResponse::success(null, 'Order deleted successfully');
-        }catch (DeleteOrderException $exception) {
+        }catch (OrderException $exception) {
             return ApiResponse::error($exception->getMessage());
         } catch (Exception $exception) {
             return ApiResponse::error('An unexpected error occurred. Please try again later.', Response::HTTP_INTERNAL_SERVER_ERROR);

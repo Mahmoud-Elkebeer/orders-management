@@ -4,5 +4,5 @@ namespace App\Exceptions;
 
 use Exception;
 
-class DeleteOrderException extends Exception {}
+class OrderException extends Exception {}
 
