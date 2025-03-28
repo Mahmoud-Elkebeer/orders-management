@@ -23,7 +23,16 @@ class ProcessPaymentRequest extends FormRequest
     {
         return [
             'order_id' => 'required|exists:orders,id',
+            'user_id' => 'required|exists:users,id',
+            'amount' => 'required|numeric',
             'payment_method' => 'required|string|in:credit_card,paypal',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => auth()->id(),
+        ]);
     }
 }

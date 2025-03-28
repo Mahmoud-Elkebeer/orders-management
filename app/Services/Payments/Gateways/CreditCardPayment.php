@@ -6,17 +6,21 @@ use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\Payments\PaymentGatewayInterface;
+use App\Services\Payments\PaymentService;
 
 class CreditCardPayment implements PaymentGatewayInterface {
+
+    public function __construct(
+        public PaymentService $paymentService,
+    ){}
+
     public function processPayment(Order $order, array $paymentData): Payment
     {
-        $transactionId = 'CC-' . strtoupper(uniqid());
+        $paymentData['transaction_id'] = 'CC-' . strtoupper(uniqid());
+        $paymentData['order_id'] = $order->id;
+        $paymentData['payment_method'] = 'credit_card';
+        $paymentData['status'] = PaymentStatus::SUCCESSFUL;
 
-        return Payment::create([
-            'order_id' => $order->id,
-            'status' => PaymentStatus::SUCCESSFUL,
-            'payment_method' => 'credit_card',
-            'transaction_id' => $transactionId,
-        ]);
+        return $this->paymentService->createPayment($paymentData);
     }
 }

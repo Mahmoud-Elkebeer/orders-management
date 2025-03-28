@@ -18,6 +18,7 @@ class PaymentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'amount' => $this->amount,
             'status' => PaymentStatus::getLabel($this->status),
             'payment_method' => $this->payment_method,
             'transaction_id' => $this->transaction_id,

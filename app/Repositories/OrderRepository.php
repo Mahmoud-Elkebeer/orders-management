@@ -25,7 +25,7 @@ class OrderRepository
         return DB::transaction(function () use ($data) {
             $order = Order::create([
                 'user_id' => $data['user_id'],
-                'total' => collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']),
+                'amount' => collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']),
                 'status' => OrderStatus::PENDING,
             ]);
 
@@ -38,10 +38,10 @@ class OrderRepository
     public function updateOrder(Order $order, array $data): Order
     {
         return DB::transaction(function () use ($order, $data) {
-            $total = collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']);
+            $amount = collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']);
 
             $order->update([
-                'total' => $total,
+                'amount' => $amount,
                 'status' => $data['status'] ?? OrderStatus::PENDING,
             ]);
 

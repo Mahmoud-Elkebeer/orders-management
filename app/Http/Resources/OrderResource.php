@@ -17,7 +17,7 @@ class OrderResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'total' => $this->total,
+            'amount' => $this->amount,
             'status' => OrderStatus::getLabel($this->status),
             'items' => OrderItemResource::collection($this->items),
             'created_at' => $this->created_at->toDateTimeString(),

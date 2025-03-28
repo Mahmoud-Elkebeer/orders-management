@@ -24,11 +24,7 @@ class PaymentService
      */
     public function processPayment(array $data = []): Payment
     {
-        $order = $this->orderRepository->getOrderById( $data['order_id']);
-
-        if (!$order) {
-            throw new ProcessPaymentException('Order not found.');
-        }
+        $order = $this->orderRepository->getOrderById($data['order_id']);
 
         if ($order->status !== OrderStatus::CONFIRMED) {
             throw new ProcessPaymentException('Only confirmed orders can be paid for.');
@@ -51,8 +47,13 @@ class PaymentService
         }
     }
 
-    public function getPayments(?int $orderId = null, $perPage = 10)
+    public function getPayments(?int $userId = null, ?int $orderId = null, $perPage = 10)
     {
-        return $this->paymentRepository->getPayments($orderId)->paginate($perPage);
+        return $this->paymentRepository->getPayments($userId, $orderId)->paginate($perPage);
+    }
+
+    public function createPayment(array $data): Payment
+    {
+        return $this->paymentRepository->createPayment($data);
     }
 }

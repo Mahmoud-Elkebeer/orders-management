@@ -18,7 +18,7 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $payments = $this->paymentService->getPayments($request->query('order_id'));
+        $payments = $this->paymentService->getPayments(auth()->id(), $request->query('order_id'));
 
         return ApiResponse::success(PaymentResource::collection($payments), 'Payments retrieved successfully');
     }
@@ -31,8 +31,7 @@ class PaymentController extends Controller
             return ApiResponse::success(new PaymentResource($payment), 'Payment processed successfully');
         } catch (ProcessPaymentException $exception) {
             return ApiResponse::error($exception->getMessage());
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             return ApiResponse::error('An unexpected error occurred. Please try again later.', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -21,6 +21,6 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::apiResource('orders', OrderController::class);
-    Route::get('payments', [PaymentController::class, 'index']);
-    Route::post('payments/process', [PaymentController::class, 'process']);
+    Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('payments/process', [PaymentController::class, 'process'])->name('payments.process');
 });
