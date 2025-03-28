@@ -4,6 +4,7 @@
 This Laravel-based API provides a robust order and payment management system with a focus on clean code principles and extensibility. The system allows seamless integration of new payment gateways with minimal code changes.
 
 ## Features
+
 ### Order Management
 - **Create Order**: Accepts user details, purchased items (product name, quantity, price), and calculates the total.
 - **Update Order**: Allows modifying existing order details.
